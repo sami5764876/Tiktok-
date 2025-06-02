@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Gamer Senpai</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Raleway&display=swap');
+
+  :root {
+    --primary-color: #4f46e5;
+    --secondary-color: #10b981;
+    --background-gradient: linear-gradient(135deg, #1e293b, #3b82f6);
+    --card-bg: #0f172a;
+    --text-color: #e0e7ff;
+    --accent-color: #3b82f6;
+    --error-color: #ef4444;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--background-gradient);
+    color: var(--text-color);
+    font-family: 'Raleway', sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 3rem 1rem 6rem;
+  }
+
+  header {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 3.5rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--secondary-color);
+    text-shadow:
+      0 0 8px #10b981aa,
+      0 0 15px #10b981bb;
+    margin-bottom: 2rem;
+    user-select: none;
+  }
+
+  form {
+    width: 100%;
+    max-width: 600px;
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+  }
+
+  input[type="url"] {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    font-size: 1.15rem;
+    border-radius: 0.5rem 0 0 0.5rem;
+    border: none;
+    outline: none;
+    font-family: 'Raleway', sans-serif;
+  }
+
+  input[type="url"]:focus {
+    box-shadow: 0 0 12px var(--secondary-color);
+  }
+
+  button {
+    padding: 0 1.5rem;
+    background: var(--secondary-color);
+    border: none;
+    border-radius: 0 0.5rem 0.5rem 0;
+    color: #fff;
+    font-size: 1.2rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    font-family: 'Orbitron', sans-serif;
+  }
+
+  button:hover, button:focus {
+    background-color: #14c87f;
+  }
+
+  #result {
+    width: 100%;
+    max-width: 600px;
+    background-color: var(--card-bg);
+    border-radius: 1rem;
+    padding: 2rem;
+    box-shadow:
+      0 0 20px 4px #10b981aa;
+    display: none;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  #result.visible {
+    display: flex;
+  }
+
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 1.25rem;
+  }
+
+  .info-label {
+    font-weight: 700;
+  }
+
+  .info-value {
+    color: var(--secondary-color);
+    font-weight: 700;
+  }
+
+  .profile-followers {
+    margin-top: -0.5rem;
+    font-size: 1rem;
+    color: #a5b4fc;
+  }
+
+  video {
+    width: 100%;
+    border-radius: 1rem;
+    box-shadow: 0 0 15px 3px #10b981cc;
+    background-color: black;
+  }
+
+  #download-btn {
+    margin-top: 1rem;
+    padding: 0.75rem 1.5rem;
+    background-color: var(--primary-color);
+    color: #fff;
+    font-weight: 700;
+    border-radius: 0.7rem;
+    border: none;
+    cursor: pointer;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.1rem;
+    align-self: center;
+    transition: background-color 0.3s ease;
+  }
+  #download-btn:hover, #download-btn:focus {
+    background-color: #6366f1;
+  }
+
+  #loading {
+    color: var(--secondary-color);
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 600;
+    font-size: 1.2rem;
+    margin-top: 0.5rem;
+  }
+
+  #error-message {
+    margin-top: 1rem;
+    padding: 0.8rem 1rem;
+    background-color: var(--error-color);
+    border-radius: 0.5rem;
+    color: white;
+    font-weight: 700;
+    text-align: center;
+    user-select: none;
+    display: none;
+  }
+
+  @media (max-width: 640px) {
+    header {
+      font-size: 2.5rem;
+      text-align: center;
+    }
+
+    form {
+      flex-direction: column;
+    }
+    input[type="url"], button {
+      width: 100%;
+      border-radius: 0.5rem;
+    }
+    button {
+      margin-top: 0.75rem;
+      border-radius: 0.5rem;
+    }
+
+    #result {
+      padding: 1.5rem;
+    }
+  }
+
+</style>
+</head>
+<body>
+  <header>Gamer Senpai</header>
+
+  <form id="video-form" autocomplete="off">
+    <input 
+      id="video-url" 
+      type="url" 
+      placeholder="Paste TikTok video link here..." 
+      required 
+      pattern="https?://(www\.)?tiktok\.com/.+" 
+      title="Enter a valid TikTok video URL" 
+    />
+    <button type="submit" aria-label="Fetch Video Details">Search</button>
+  </form>
+
+  <div id="loading" role="status" aria-live="polite" style="display:none;">Loading...</div>
+  <div id="error-message" role="alert"></div>
+
+  <section id="result" aria-live="polite" aria-atomic="true">
+    <video controls muted playsinline></video>
+    <button id="download-btn" type="button">Download Video</button>
+    <div class="info-row"><span class="info-label">Likes:</span> <span id="likes" class="info-value"></span></div>
+    <div class="info-row"><span class="info-label">Comments:</span> <span id="comments" class="info-value"></span></div>
+    <div class="info-row profile-followers">Profile Followers: <span id="followers"></span></div>
+  </section>
+
+<script>
+(() => {
+  const form = document.getElementById('video-form');
+  const urlInput = document.getElementById('video-url');
+  const loadingEl = document.getElementById('loading');
+  const errorEl = document.getElementById('error-message');
+  const resultSection = document.getElementById('result');
+  const videoEl = resultSection.querySelector('video');
+  const downloadBtn = document.getElementById('download-btn');
+  const likesEl = document.getElementById('likes');
+  const commentsEl = document.getElementById('comments');
+  const followersEl = document.getElementById('followers');
+
+  // CORS proxy to access TikTok page HTML (for demonstration, public demo - rate limits apply)
+  const CORS_PROXY = 'https://cors-anywhere.herokuapp.com/';
+
+  // Utility: Format numbers with commas
+  function formatNumber(num) {
+    if (num === null || num === undefined) return '-';
+    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  }
+
+  // Extract video id from TikTok URL
+  function extractVideoId(url) {
+    // TikTok URLs typically contain /video/<videoId> or /<username>/video/<videoId>
+    try {
+      const parsedUrl = new URL(url);
+      const pathSegments = parsedUrl.pathname.split('/').filter(Boolean);
+      const videoIndex = pathSegments.indexOf('video');
+      if (videoIndex !== -1 && pathSegments.length > videoIndex + 1) {
+        return pathSegments[videoIndex + 1];
+      }
+    } catch (_) {}
+    return null;
+  }
+
+  // Parse TikTok page HTML for video info
+  function parseTikTokData(htmlText) {
+    // We want to parse out the window['SIGI_STATE'] object that contains video and author info
+    const sigiStateRegex = /window\['SIGI_STATE'\]\s*=\s*(\{.+?\});/s;
+    const match = htmlText.match(sigiStateRegex);
+    if (!match) {
+      throw new Error('Unable to find TikTok data in page');
+    }
+    const sigiStateStr = match[1];
+    let data = null;
+    try {
+      data = JSON.parse(sigiStateStr);
+    } catch (e) {
+      throw new Error('Failed to parse TikTok data');
+    }
+    return data;
+  }
+
+  // Main function to fetch TikTok video info using CORS proxy
+  async function fetchTikTokInfo(videoUrl) {
+    // Validate input
+    const videoId = extractVideoId(videoUrl);
+    if (!videoId) throw new Error('Invalid TikTok video URL.');
+
+    // Fetch the TikTok video page HTML via CORS Proxy
+    const targetUrl = videoUrl.split('?')[0]; // strip params to avoid issues
+    const corsUrl = CORS_PROXY + targetUrl;
+
+    const resp = await fetch(corsUrl, {
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest'
+      }
+    });
+    if (!resp.ok) {
+      throw new Error('Failed to fetch TikTok page. Try again later.');
+    }
+
+    const text = await resp.text();
+
+    // Parse the data object
+    const sigiState = parseTikTokData(text);
+
+    // Extract relevant data using videoId
+    const videoData = sigiState.ItemModule && sigiState.ItemModule[videoId];
+    if (!videoData) throw new Error('Unable to find video data.');
+
+    const authorId = videoData.author;
+
+    // Retrieve author data
+    const authorData = sigiState.UserModule && sigiState.UserModule.users && sigiState.UserModule.users[authorId];
+    if (!authorData) throw new Error('Unable to find author data.');
+
+    // Extract likes, comments, followers, video URL
+    const likes = videoData.stats ? videoData.stats.diggCount : null;
+    const comments = videoData.stats ? videoData.stats.commentCount : null;
+    const followers = authorData.stats ? authorData.stats.followerCount : null;
+
+    // Video URLs - prioritized without watermark
+    let playAddr = videoData.video && videoData.video.playAddr;
+    let downloadAddr = videoData.video && videoData.video.downloadAddr;
+
+    // Note: TikTok often obfuscates no-watermark video URLs, trying to use downloadAddr as fallback
+    // We'll use downloadAddr to allow video download and playAddr for video player
+
+    // To bypass watermark for playAddr, sometimes videoData.video.playAddr has watermark, but downloadAddr better for downloading
+
+    return {
+      likes,
+      comments,
+      followers,
+      videoUrl: downloadAddr || playAddr
+    };
+  }
+
+  // Update UI function
+  function updateUI(data) {
+    likesEl.textContent = formatNumber(data.likes);
+    commentsEl.textContent = formatNumber(data.comments);
+    followersEl.textContent = formatNumber(data.followers);
+
+    if (data.videoUrl) {
+      videoEl.src = data.videoUrl;
+      downloadBtn.disabled = false;
+      downloadBtn.dataset.url = data.videoUrl;
+    } else {
+      videoEl.src = '';
+      downloadBtn.disabled = true;
+      downloadBtn.removeAttribute('data-url');
+    }
+
+    resultSection.classList.add('visible');
+  }
+
+  // Show error
+  function showError(message) {
+    errorEl.textContent = message;
+    errorEl.style.display = 'block';
+    resultSection.classList.remove('visible');
+  }
+
+  // Clear error
+  function clearError() {
+    errorEl.textContent = '';
+    errorEl.style.display = 'none';
+  }
+
+  // Show loading
+  function showLoading() {
+    loadingEl.style.display = 'block';
+    form.querySelector('button').disabled = true;
+    urlInput.disabled = true;
+    clearError();
+  }
+
+  // Hide loading
+  function hideLoading() {
+    loadingEl.style.display = 'none';
+    form.querySelector('button').disabled = false;
+    urlInput.disabled = false;
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    clearError();
+    resultSection.classList.remove('visible');
+    videoEl.pause();
+    videoEl.src = '';
+
+    const inputUrl = urlInput.value.trim();
+    if (!inputUrl) {
+      showError('Please enter a TikTok video URL.');
+      return;
+    }
+
+    showLoading();
+    try {
+      const data = await fetchTikTokInfo(inputUrl);
+      updateUI(data);
+    } catch (error) {
+      showError(error.message || 'Failed to fetch video data. Please check the link and try again.');
+    } finally {
+      hideLoading();
+    }
+  });
+
+  downloadBtn.addEventListener('click', () => {
+    const url = downloadBtn.dataset.url;
+    if (!url) return;
+
+    // Create temporary link for download
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'tiktok_video.mp4';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  });
+})();
+</script>
+</body>
+</html>
+
